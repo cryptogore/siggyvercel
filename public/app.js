@@ -1,73 +1,58 @@
 const messages = document.getElementById("messages");
 
-/* MESSAGE RENDER */
 function addMessage(text,type){
-
-let div=document.createElement("div")
-div.className=`message ${type}`
-
-div.innerHTML = type==="user"
-? `<div class="bubble">${text}</div>`
-: `<div class="bubble">${text}</div>`
-
-messages.appendChild(div)
-messages.scrollTop = messages.scrollHeight
+  const div=document.createElement("div");
+  div.className=`message ${type}`;
+  div.textContent=(type==="user"?"You: ":"Siggy: ")+text;
+  messages.appendChild(div);
+  messages.scrollTop=messages.scrollHeight;
 }
 
-/* GREETING FROM BACKEND */
 async function loadGreeting(){
-try{
-const res = await fetch("/api/greeting")
-const data = await res.json()
-addMessage(data.greeting,"bot")
-}catch{
-addMessage("Siggy waking up...","bot")
-}
+  try{
+    const res=await fetch("/api/greeting");
+    const data=await res.json();
+    addMessage(data.greeting,"bot");
+  }catch{
+    addMessage("Siggy waking up...","bot");
+  }
 }
 
-/* SEND MESSAGE */
 async function sendMessage(){
+  const input=document.getElementById("msg");
+  const text=input.value.trim();
+  if(!text)return;
 
-let input=document.getElementById("msg")
-let text=input.value.trim()
+  addMessage(text,"user");
+  input.value="";
 
-if(!text)return
+  try{
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:text})
+    });
 
-addMessage(text,"user")
-input.value=""
+    const data=await res.json();
+    addMessage(data.response,"bot");
 
-try{
-
-let res=await fetch("/api/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({message:text})
-})
-
-let data=await res.json()
-
-addMessage(data.response,"bot")
-
-}catch{
-addMessage("⚠ Siggy cannot respond","bot")
+  }catch{
+    addMessage("⚠ error","bot");
+  }
 }
 
-}
-
-/* EVENTS */
-document.getElementById("send").onclick = sendMessage
+document.getElementById("send").onclick=sendMessage;
 
 document.getElementById("msg").addEventListener("keydown",(e)=>{
-if(e.key==="Enter"){
-e.preventDefault()
-sendMessage()
-}
-})
+  if(e.key==="Enter"){
+    e.preventDefault();
+    sendMessage();
+  }
+});
 
-document.getElementById("newChatBtn").onclick = ()=>{
-messages.innerHTML=""
-loadGreeting()
-}
+document.getElementById("newChatBtn").onclick=()=>{
+  messages.innerHTML="";
+  loadGreeting();
+};
 
-/* INIT */
-loadGreeting()
+loadGreeting();

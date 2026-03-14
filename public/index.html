@@ -5,31 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Siggy Dormitory</title>
 
+<link rel="icon" href="./assets/ritual-symbol.png">
 <link rel="stylesheet" href="./styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <div id="newChatBtn" class="newchat">+ New Chat</div>
+
+<div class="newchat" id="newChatBtn">+ New Chat</div>
+
+<div id="history" class="history"></div>
+
+<div class="archive-toggle" id="archiveToggle">Archived Chats</div>
+<div id="archive" class="archive-list"></div>
+
 </div>
 
 <div class="main">
 
-  <div class="symbol-container">
-    <img src="./assets/ritual-symbol.png" class="symbol">
-  </div>
+<div class="symbol-container">
+<img src="./assets/ritual-symbol.png" class="symbol">
+</div>
 
-  <div class="header">🐱 Siggy · Mystical Oracle Cat</div>
+<div class="header">🐱 Siggy · Mystical Oracle Cat</div>
 
-  <div id="messages" class="messages"></div>
+<div id="messages" class="messages"></div>
 
-  <div class="input-area">
-    <input id="msg" placeholder="Ask Siggy something...">
-    <button id="send">Send</button>
-  </div>
+<div class="input-area">
+<input id="msg" placeholder="Ask Siggy something...">
+<button id="send">Send</button>
+</div>
 
 </div>
+
+<div id="menu" class="context-menu"></div>
 
 <script type="module" src="./app.js"></script>
 

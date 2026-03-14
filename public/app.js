@@ -121,7 +121,6 @@ setTimeout(typing,8)
 
 typing()
 
-/* SAVE */
 let chat=sessions.find(c=>c.id===currentSession)
 chat.messages.push({text,type:"bot"})
 save()
@@ -161,6 +160,7 @@ typeMessage(data.response)
 loading.remove()
 addMessage("⚠ error","bot")
 }
+
 }
 
 /* EVENTS */

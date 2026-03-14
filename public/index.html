@@ -5,12 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Siggy Dormitory</title>
 
+<link rel="icon" href="./assets/ritual-symbol.png">
 <link rel="stylesheet" href="./styles.css">
-</head>
 
+</head>
 <body>
-<div id="app"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="newchat" id="newChatBtn">+ New Chat</div>
+  <div id="history" class="history"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="symbol-container">
+    <img src="./assets/ritual-symbol.png" class="symbol">
+  </div>
+
+  <div class="header">🐱 Siggy · Mystical Oracle Cat</div>
+
+  <div id="messages" class="messages"></div>
+
+  <div class="input-area">
+    <input id="msg" placeholder="Ask Siggy something...">
+    <button id="send">Send</button>
+  </div>
+
+</div>
 
 <script type="module" src="./app.js"></script>
+
 </body>
 </html>

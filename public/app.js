@@ -1,4 +1,4 @@
-import { getGreeting } from "./greetings.js";
+import { getGreeting } from "/public/greetings.js";
 
 /* STATE */
 let sessions = JSON.parse(localStorage.getItem("siggy_sessions")) || [];

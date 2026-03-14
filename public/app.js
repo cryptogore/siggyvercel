@@ -1,6 +1,7 @@
-import { getGreeting } from "/public/greetings.js";
+import { getGreeting } from "./greetings.js";
 
-/* STATE */
+/* ================= STATE ================= */
+
 let sessions = JSON.parse(localStorage.getItem("siggy_sessions")) || [];
 let currentSession = null;
 
@@ -9,7 +10,6 @@ const historyDiv = document.getElementById("history");
 const archiveDiv = document.getElementById("archive");
 const menu = document.getElementById("menu");
 
-/* SAVE */
 function save(){
   localStorage.setItem("siggy_sessions", JSON.stringify(sessions));
 }
@@ -17,33 +17,37 @@ function save(){
 /* ================= SIDEBAR ================= */
 
 function renderSidebar(){
+
   historyDiv.innerHTML = "";
   archiveDiv.innerHTML = "";
 
-  sessions.filter(c=>!c.archived)
-    .forEach(chat => createItem(chat, historyDiv));
+  sessions.forEach(chat=>{
+    const item = createItem(chat);
 
-  sessions.filter(c=>c.archived)
-    .forEach(chat => createItem(chat, archiveDiv));
+    if(chat.archived){
+      archiveDiv.appendChild(item);
+    }else{
+      historyDiv.appendChild(item);
+    }
+  });
 }
 
-function createItem(chat, container){
+function createItem(chat){
 
-  let div = document.createElement("div");
+  const div = document.createElement("div");
   div.className = "history-item";
 
-  let title = document.createElement("span");
-  title.className = "chat-title";
+  const title = document.createElement("span");
   title.textContent = chat.title;
 
-  let btn = document.createElement("span");
-  btn.className = "menu-btn";
+  const btn = document.createElement("span");
   btn.textContent = "⋯";
+  btn.className = "menu-btn";
 
-  /* CLICK CHAT */
-  title.onclick = () => loadSession(chat.id);
+  /* ⚡ INSTANT CLICK */
+  div.onclick = () => loadSession(chat.id);
 
-  /* MENU FIX (INI YANG BIKIN ERROR LU TADI) */
+  /* MENU */
   btn.onclick = (e)=>{
     e.stopPropagation();
     openMenu(e, chat.id);
@@ -51,7 +55,8 @@ function createItem(chat, container){
 
   div.appendChild(title);
   div.appendChild(btn);
-  container.appendChild(div);
+
+  return div;
 }
 
 /* ================= MENU ================= */
@@ -62,23 +67,22 @@ function openMenu(e, id){
   menu.style.left = e.pageX + "px";
   menu.style.top = e.pageY + "px";
 
-  menu.innerHTML = "";
+  menu.innerHTML = `
+    <div data-act="rename">Rename</div>
+    <div data-act="archive">Archive</div>
+    <div data-act="delete">Delete</div>
+  `;
 
-  let rename = document.createElement("div");
-  rename.textContent = "Rename";
-  rename.onclick = () => renameChat(id);
+  menu.onclick = (ev)=>{
+    const act = ev.target.dataset.act;
+    if(!act) return;
 
-  let archive = document.createElement("div");
-  archive.textContent = "Archive";
-  archive.onclick = () => archiveChat(id);
+    if(act==="rename") renameChat(id);
+    if(act==="archive") archiveChat(id);
+    if(act==="delete") deleteChat(id);
 
-  let del = document.createElement("div");
-  del.textContent = "Delete";
-  del.onclick = () => deleteChat(id);
-
-  menu.appendChild(rename);
-  menu.appendChild(archive);
-  menu.appendChild(del);
+    menu.style.display = "none";
+  };
 }
 
 function renameChat(id){
@@ -129,35 +133,49 @@ function newChat(){
   addMessage(getGreeting(), "bot");
 }
 
+/* ⚡ ULTRA FAST LOAD */
 function loadSession(id){
+
+  if(currentSession === id) return;
 
   currentSession = id;
 
-  let chat = sessions.find(c=>c.id===id);
+  const chat = sessions.find(c=>c.id===id);
   if(!chat) return;
 
-  /* SUPER CEPAT */
-  messages.innerHTML = chat.messages.map(m=>`
-    <div class="message ${m.type}">
-      <div class="bubble">${m.text}</div>
-    </div>
-  `).join("");
+  messages.innerHTML = "";
+
+  const frag = document.createDocumentFragment();
+
+  for(let i=0;i<chat.messages.length;i++){
+
+    const m = chat.messages[i];
+
+    const div = document.createElement("div");
+    div.className = `message ${m.type}`;
+    div.innerHTML = `<div class="bubble">${m.text}</div>`;
+
+    frag.appendChild(div);
+  }
+
+  messages.appendChild(frag);
+
+  messages.scrollTop = messages.scrollHeight;
 }
 
 /* ================= MESSAGE ================= */
 
 function addMessage(text, type, saveMsg=true){
 
-  let div = document.createElement("div");
+  const div = document.createElement("div");
   div.className = `message ${type}`;
-
   div.innerHTML = `<div class="bubble">${text}</div>`;
 
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 
   if(saveMsg){
-    let chat = sessions.find(c=>c.id===currentSession);
+    const chat = sessions.find(c=>c.id===currentSession);
     chat.messages.push({text, type});
 
     if(chat.messages.length === 1){
@@ -173,10 +191,10 @@ function addMessage(text, type, saveMsg=true){
 
 function typeMessage(text){
 
-  let div = document.createElement("div");
+  const div = document.createElement("div");
   div.className = "message bot";
 
-  let bubble = document.createElement("div");
+  const bubble = document.createElement("div");
   bubble.className = "bubble";
 
   div.appendChild(bubble);
@@ -189,13 +207,13 @@ function typeMessage(text){
       bubble.innerHTML += text[i];
       i++;
       messages.scrollTop = messages.scrollHeight;
-      setTimeout(typing, 8);
+      setTimeout(typing, 6);
     }
   }
 
   typing();
 
-  let chat = sessions.find(c=>c.id===currentSession);
+  const chat = sessions.find(c=>c.id===currentSession);
   chat.messages.push({text, type:"bot"});
   save();
 }
@@ -204,27 +222,27 @@ function typeMessage(text){
 
 async function sendMessage(){
 
-  let input = document.getElementById("msg");
-  let text = input.value.trim();
+  const input = document.getElementById("msg");
+  const text = input.value.trim();
   if(!text) return;
 
   addMessage(text, "user");
   input.value = "";
 
-  let loading = document.createElement("div");
+  const loading = document.createElement("div");
   loading.className = "message bot";
   loading.innerHTML = `<div class="bubble">...</div>`;
   messages.appendChild(loading);
 
   try{
 
-    let res = await fetch("/api/chat",{
+    const res = await fetch("/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message:text})
     });
 
-    let data = await res.json();
+    const data = await res.json();
 
     loading.remove();
     typeMessage(data.response);
@@ -253,7 +271,6 @@ document.getElementById("archiveToggle").onclick = ()=>{
     archiveDiv.style.display === "block" ? "none" : "block";
 };
 
-/* CLOSE MENU */
 document.body.onclick = ()=>{
   menu.style.display = "none";
 };
